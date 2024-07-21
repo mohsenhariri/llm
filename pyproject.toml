@@ -5,7 +5,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "package-name"
+name = "llm"
 dynamic = ["version"]
 authors = [
   {name = "Mohsen Hariri", email = "mhariri68@gmail.com"},

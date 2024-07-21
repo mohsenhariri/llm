@@ -24,7 +24,7 @@ else
 	PY := $(VIRTUAL_ENV)/bin/python
 endif
 
-SRC := pkg# just for this template
+SRC := llm
 # SRC := $(PROJECT)# for a python package
 DIST := dist
 BUILD := build
