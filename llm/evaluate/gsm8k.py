@@ -145,12 +145,16 @@ def concat_cot_prompt(question, n_shots=8):
 
 
 def load_model(checkpoint):
-    model = AutoModelForCausalLM.from_pretrained(
-        checkpoint, device_map="auto", torch_dtype=torch.float16
-    )
-    tokenizer = AutoTokenizer.from_pretrained(checkpoint)
-    # model.generation_config.pad_token_id = tokenizer.pad_token_id
-    model.eval()
+    if checkpoint == "olmo":
+        model, tokenizer = olmo_loader()
+
+    else:
+        model = AutoModelForCausalLM.from_pretrained(
+            checkpoint, device_map="auto", torch_dtype=torch.float16
+        )
+        tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+        # model.generation_config.pad_token_id = tokenizer.pad_token_id
+        model.eval()
 
     return model, tokenizer
 
@@ -333,6 +337,7 @@ if __name__ == "__main__":
     )
 
     checkpoints = [
+        "olmo",
         "mistralai/Mistral-7B-v0.1",
         "mistralai/Mistral-7B-Instruct-v0.2",
         "meta-llama/Llama-2-7b-hf",
