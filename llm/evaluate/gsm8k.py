@@ -175,13 +175,14 @@ def generate_response(
     output = model.generate(**input, **generate_kwargs)
     output = output[0]
 
+    input_prompt_len = input["input_ids"].shape[1]
+
     if remove_input_prompt:
-        input_prompt_len = input["input_ids"].shape[1]
         output = output[input_prompt_len:]
 
     response = tokenizer.decode(output, skip_special_tokens=True)
 
-    return response
+    return response, input_prompt_len
 
 
 def clean_response(response, remove_input_prompt=True):
@@ -216,7 +217,7 @@ def evaluate(
     save_response=False,
 ):
 
-    readable_responses, corrects = 0, 0
+    readable_responses, corrects, input_length_total, input_length_avg = 0, 0, 0, 0
 
     gsm_eval = load_gsm8k(subset=subset)
     num_questions = len(gsm_eval)
@@ -241,7 +242,9 @@ def evaluate(
 
         # print(f"Inference prompt: {prompt} \n")
 
-        response = generate_response(prompt, model, tokenizer, generate_kwargs)
+        response, input_prompt_len = generate_response(
+            prompt, model, tokenizer, generate_kwargs
+        )
 
         # print(f"Response: {response} \n")
 
@@ -269,6 +272,8 @@ def evaluate(
                     output_dict["prediction"].append(final_answer_prediction)
 
                 readable_responses += 1
+                input_length += input_prompt_len
+
             except ValueError as e:
                 print(f"Error: Value Error in iteration {i} \n")
                 unsuccessful_responses_dict["index"].append(i)
@@ -287,8 +292,11 @@ def evaluate(
 
     if readable_responses == 0:
         accuracy = 0
+        input_length_avg = 0
+
     else:
         accuracy = corrects / readable_responses
+        input_length_avg = input_length / readable_responses
 
     print(f"Accuracy: {accuracy}")
 
@@ -301,7 +309,7 @@ def evaluate(
             f"{save_response}/unsuccessful_responses.csv", index=False
         )
 
-    return accuracy, readable_responses
+    return accuracy, readable_responses, input_length_avg
 
 
 def evaluate_init(checkpoint):
@@ -319,7 +327,7 @@ def evaluate_init(checkpoint):
 
     model, tokenizer = load_model(checkpoint)
 
-    accuracy, readable_responses = evaluate(
+    accuracy, readable_responses, input_length_avg = evaluate(
         model,
         tokenizer,
         generate_kwargs,
@@ -339,7 +347,7 @@ def evaluate_init(checkpoint):
         "num_responses": readable_responses,
         "generate_kwargs": generate_kwargs,
         "config": config,
-        "prompt_avg": 32,
+        "input_tokens_avg": input_length_avg,
     }
 
     with open(output_dir / "results.json", "w") as f:
