@@ -3,6 +3,3 @@ export QT_QPA_PLATFORM := wayland
 
 unittest:
 		$(PY) -m unittest $(SRC)/test_*.py
-
-evaluate-gsm8k:
-		/storage/envs/py/llm/env_home_linux_3.11/bin/python llm/evaluate/gsm8k.py

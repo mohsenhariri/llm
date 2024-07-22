@@ -17,9 +17,14 @@ ENV_JUPYTER := $(ENV_PATH_ROOT)/jupyter
 JUPYTER_PORT := 3000
 
 ifeq ($(strip $(VIRTUAL_ENV)),)
-	PATH := $(ENV_PATH)/$(ENV_NAME)/bin:$(PATH)
-    PY := $(ENV_PATH)/$(ENV_NAME)/bin/python
-else
+	ifeq ($(strip $(CONDA_PREFIX)),)
+		PATH := $(ENV_PATH)/$(ENV_NAME)/bin:$(PATH)
+		PY := $(ENV_PATH)/$(ENV_NAME)/bin/python
+	else
+		PATH := $(CONDA_PREFIX)/bin:$(PATH)
+		PY := $(CONDA_PREFIX)/bin/python
+	endif
+else	
 	PATH := $(VIRTUAL_ENV)/bin:$(PATH)
 	PY := $(VIRTUAL_ENV)/bin/python
 endif
@@ -28,12 +33,12 @@ SRC := llm
 # SRC := $(PROJECT)# for a python package
 DIST := dist
 BUILD := build
-API := api
+#API := api
 
 # PY_FILES = $(shell find $(SRC) -type f -name '*.py')
 PY_FILES := $(shell find $(SRC) -type f -name '*.py' | grep -v '^.*\/test_.*\.py$$')
 PY_FILES_TEST := $(shell find $(SRC) -type f -name 'test_*.py')
-PY_FILES_API := $(shell find $(API) -type f -name '*.py')
+#PY_FILES_API := $(shell find $(API) -type f -name '*.py')
 
 IGNORE_LIST := .gitignore .dockerignore exclude.lst
 
@@ -196,13 +201,13 @@ script-upgrade:
 set-dataset-permissions:
 		chmod -R a-w dataset
 
-clean-commands: py.make api.make
+clean-commands: py.make 
 		head -n 5 py.make > temp.txt && mv temp.txt py.make
-		head -n 3 api.make > temp.txt && mv temp.txt api.make
+#		head -n 3 api.make > temp.txt && mv temp.txt api.make
 
 gen-commands: clean-commands
 		$(foreach file,$(PY_FILES),$(shell echo "\n$(subst /,-,$(subst $(SRC)/,,$(basename $(file)))):\n\t\t$(PY) $(file)" >> py.make))
-		$(foreach file,$(PY_FILES_API),$(shell echo "\n$(subst /,-,$(subst $(API)/,,$(basename $(file)))):\n\t\t$(PY) $(file)" >> api.make))
+#		$(foreach file,$(PY_FILES_API),$(shell echo "\n$(subst /,-,$(subst $(API)/,,$(basename $(file)))):\n\t\t$(PY) $(file)" >> api.make))
 
 jupyter-global-start:
 		if [ ! -d "./logs" ] ; then \
