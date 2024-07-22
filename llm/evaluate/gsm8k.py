@@ -145,34 +145,42 @@ def concat_cot_prompt(question, n_shots=8):
 
 
 def load_model(checkpoint):
-    if checkpoint == "olmo":
-        model, tokenizer = olmo_loader()
 
+    model = AutoModelForCausalLM.from_pretrained(
+        checkpoint, device_map="auto", torch_dtype=torch.float16
+    )
+    tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+
+    # for key in tokenizer.special_tokens_map:
+    #     print(f"{key}: {tokenizer.special_tokens_map[key]}")
+    #     print(f"ID: {tokenizer.convert_tokens_to_ids(tokenizer.special_tokens_map[key])}")
+
+    if tokenizer.pad_token_id is None:
+        if tokenizer.eos_token_id is not None:
+            tokenizer.pad_token_id = tokenizer.eos_token_id
     else:
-        model = AutoModelForCausalLM.from_pretrained(
-            checkpoint, device_map="auto", torch_dtype=torch.float16
-        )
-        tokenizer = AutoTokenizer.from_pretrained(checkpoint)
-        # model.generation_config.pad_token_id = tokenizer.pad_token_id
-        model.eval()
+        tokenizer.pad_token_id = 0
+
+    model.eval()
 
     return model, tokenizer
 
 
-def generate_response(prompt, model, tokenizer, remove_input_prompt=True):
-    input = tokenizer(prompt, return_tensors="pt").to(model.device)
-    output = model.generate(
-        **input, max_new_tokens=256, pad_token_id=tokenizer.eos_token_id
-    )
+def generate_response(
+    prompt, model, tokenizer, generate_kwargs, remove_input_prompt=True
+):
+    input = tokenizer(
+        prompt, padding=False, add_special_tokens=True, return_tensors="pt"
+    ).to(model.device)
+    output = model.generate(**input, **generate_kwargs)
     output = output[0]
 
     if remove_input_prompt:
         input_prompt_len = input["input_ids"].shape[1]
         output = output[input_prompt_len:]
 
-    response = tokenizer.decode(
-        output, skip_special_tokens=True, ignore_tokenization_spaces=True
-    )
+    response = tokenizer.decode(output, skip_special_tokens=True)
+
     return response
 
 
@@ -199,7 +207,13 @@ def clean_response(response, remove_input_prompt=True):
 
 
 def evaluate(
-    model, tokenizer, n_shots=8, subset="test", iterations=None, save_response=False
+    model,
+    tokenizer,
+    generate_kwargs,
+    n_shots=8,
+    subset="test",
+    iterations=None,
+    save_response=False,
 ):
 
     readable_responses, corrects = 0, 0
@@ -227,7 +241,7 @@ def evaluate(
 
         # print(f"Inference prompt: {prompt} \n")
 
-        response = generate_response(prompt, model, tokenizer)
+        response = generate_response(prompt, model, tokenizer, generate_kwargs)
 
         # print(f"Response: {response} \n")
 
@@ -298,12 +312,17 @@ def evaluate_init(checkpoint):
     output_dir = Path(rf"output/{checkpoint_path}_{now}")
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    generate_kwargs = {
+        "num_return_sequences": 1,
+        "max_new_tokens": 256,
+    }
+
     model, tokenizer = load_model(checkpoint)
-    config = model.config
 
     accuracy, readable_responses = evaluate(
         model,
         tokenizer,
+        generate_kwargs,
         n_shots=8,
         subset="test",
         iterations=None,
@@ -311,12 +330,14 @@ def evaluate_init(checkpoint):
         save_response=output_dir,
     )
 
+    config = model.config
     config = config.to_dict()
 
     results = {
         "model": checkpoint,
         "accuracy": accuracy,
         "num_responses": readable_responses,
+        "generate_kwargs": generate_kwargs,
         "config": config,
         "prompt_avg": 32,
     }
@@ -337,12 +358,13 @@ if __name__ == "__main__":
     )
 
     checkpoints = [
-        "olmo",
+        "allenai/OLMo-1.7-7B-hf",
         "mistralai/Mistral-7B-v0.1",
         "mistralai/Mistral-7B-Instruct-v0.2",
         "meta-llama/Llama-2-7b-hf",
         "meta-llama/Llama-2-7b-chat-hf",
         "meta-llama/Meta-Llama-3-8B",
+        "meta-llama/Meta-Llama-3-8B-Instruct",
     ]
 
     for checkpoint in checkpoints:
