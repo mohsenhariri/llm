@@ -7,6 +7,7 @@ from pathlib import Path
 import pandas as pd
 import torch
 from datasets import concatenate_datasets, load_dataset
+from init import init
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 answer_trigger = "Let's break it down."
@@ -119,7 +120,6 @@ def create_cot_prompt(n_shots=8):
 
     cot_prompt = ""
     for i in range(n_shots):
-        # cot_prompt += "Q: " + questions[i] + "\nA: " + chains[i] + " " + ANSWER_TRIGGER + " " + answers[i] + ".\n\n"
         cot_prompt += f"Q: {questions[i]}\nA: {answer_trigger} {chains[i]} {final_answer_trigger} {answers[i]}.\n\n"
 
     return cot_prompt
@@ -195,111 +195,98 @@ def clean_response(response, remove_input_prompt=True):
 
 
 def evaluate(
-    checkpoint, n_shots=8, subset="test", iterations=None, save_response=False
+    model, tokenizer, n_shots=8, subset="test", iterations=None, save_response=False
 ):
 
-    try:
+    readable_responses, corrects = 0, 0
 
-        total_success_responses, corrects = 0, 0
+    gsm_eval = load_gsm8k(subset=subset)
+    num_questions = len(gsm_eval)
 
-        model, tokenizer = load_model(checkpoint)
-        config = model.config
+    output_dict = {"index": [], "question": [], "answer": [], "prediction": []}
 
-        # print(f"Model: {config}")
+    unsuccessful_responses_dict = {
+        "index": [],
+        "input_prompt": [],
+        "response": [],
+        "error": [],
+    }
 
-        gsm_eval = load_gsm8k(subset=subset)
-        num_questions = len(gsm_eval)
+    for i in range(num_questions) if iterations is None else range(iterations):
 
-        output_dict = {"index": [], "question": [], "answer": [], "prediction": []}
+        question, answer_truth = gsm_eval[i]["question"], gsm_eval[i]["answer"]
+        answer_truth = answer_truth.split(" ")[-1]
 
-        unsuccessful_responses_dict = {
-            "index": [],
-            "input_prompt": [],
-            "response": [],
-            "error": [],
-        }
+        prompt = concat_cot_prompt(question, n_shots)
 
-        for i in range(num_questions) if iterations is None else range(iterations):
+        print(f"Iteration, {i} \n")
 
-            question, answer_truth = gsm_eval[i]["question"], gsm_eval[i]["answer"]
-            answer_truth = answer_truth.split(" ")[-1]
+        # print(f"Inference prompt: {prompt} \n")
 
-            prompt = concat_cot_prompt(question, n_shots)
+        response = generate_response(prompt, model, tokenizer)
 
-            print(f"Iteration, {i} \n")
+        # print(f"Response: {response} \n")
 
-            # print(f"Inference prompt: {prompt} \n")
+        final_answer_prediction = clean_response(response)
 
-            response = generate_response(prompt, model, tokenizer)
+        # print(isinstance(final_answer_prediction, str))
 
-            # print(f"Response: {response} \n")
+        if isinstance(final_answer_prediction, str) == False:
 
-            final_answer_prediction = clean_response(response)
+            try:
+                final_answer_truth = (
+                    float(answer_truth) if "." in answer_truth else int(answer_truth)
+                )
 
-            # print(isinstance(final_answer_prediction, str))
+                # print(f"Predicted answer: {final_answer_prediction} \n")
+                # print(f"True answer: {final_answer_truth} \n")
 
-            if isinstance(final_answer_prediction, str) == False:
+                if final_answer_prediction == final_answer_truth:
+                    corrects += 1
 
-                try:
-                    final_answer_truth = (
-                        float(answer_truth)
-                        if "." in answer_truth
-                        else int(answer_truth)
-                    )
+                if save_response:
+                    output_dict["index"].append(i)
+                    output_dict["question"].append(question)
+                    output_dict["answer"].append(final_answer_truth)
+                    output_dict["prediction"].append(final_answer_prediction)
 
-                    # print(f"Predicted answer: {final_answer_prediction} \n")
-                    # print(f"True answer: {final_answer_truth} \n")
-
-                    if final_answer_prediction == final_answer_truth:
-                        corrects += 1
-
-                    if save_response:
-                        output_dict["index"].append(i)
-                        output_dict["question"].append(question)
-                        output_dict["answer"].append(final_answer_truth)
-                        output_dict["prediction"].append(final_answer_prediction)
-
-                    total_success_responses += 1
-                except ValueError as e:
-                    print(f"Error: Value Error in iteration {i} \n")
-                    unsuccessful_responses_dict["index"].append(i)
-                    unsuccessful_responses_dict["input_prompt"].append(prompt)
-                    unsuccessful_responses_dict["response"].append(response)
-                    unsuccessful_responses_dict["error"].append(
-                        "Cannot convert true answer"
-                    )
-
-            else:
+                readable_responses += 1
+            except ValueError as e:
                 print(f"Error: Value Error in iteration {i} \n")
                 unsuccessful_responses_dict["index"].append(i)
                 unsuccessful_responses_dict["input_prompt"].append(prompt)
                 unsuccessful_responses_dict["response"].append(response)
-                unsuccessful_responses_dict["error"].append(final_answer_prediction)
+                unsuccessful_responses_dict["error"].append(
+                    "Cannot convert true answer"
+                )
 
-        if total_success_responses == 0:
-            accuracy = 0
         else:
-            accuracy = corrects / total_success_responses
+            print(f"Error: Value Error in iteration {i} \n")
+            unsuccessful_responses_dict["index"].append(i)
+            unsuccessful_responses_dict["input_prompt"].append(prompt)
+            unsuccessful_responses_dict["response"].append(response)
+            unsuccessful_responses_dict["error"].append(final_answer_prediction)
 
-        print(f"Accuracy: {accuracy}")
+    if readable_responses == 0:
+        accuracy = 0
+    else:
+        accuracy = corrects / readable_responses
 
-        if save_response:
-            df_success = pd.DataFrame(output_dict)
-            df_success.to_csv(f"{save_response}/successful_responses.csv", index=False)
+    print(f"Accuracy: {accuracy}")
 
-            df_unsuccessful = pd.DataFrame(unsuccessful_responses_dict)
-            df_unsuccessful.to_csv(
-                f"{save_response}/unsuccessful_responses.csv", index=False
-            )
+    if save_response:
+        df_success = pd.DataFrame(output_dict)
+        df_success.to_csv(f"{save_response}/successful_responses.csv", index=False)
 
-        return accuracy, config
+        df_unsuccessful = pd.DataFrame(unsuccessful_responses_dict)
+        df_unsuccessful.to_csv(
+            f"{save_response}/unsuccessful_responses.csv", index=False
+        )
 
-    except Exception as e:
-        print(f"Error: {e}")
-        return str(e), config
+    return accuracy, readable_responses
 
 
-def evaluation_init(checkpoint):
+def evaluate_init(checkpoint):
 
     now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
@@ -307,18 +294,28 @@ def evaluation_init(checkpoint):
     output_dir = Path(rf"output/{checkpoint_path}_{now}")
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    acc, config = evaluate(
-        checkpoint=checkpoint,
+    model, tokenizer = load_model(checkpoint)
+    config = model.config
+
+    accuracy, readable_responses = evaluate(
+        model,
+        tokenizer,
         n_shots=8,
         subset="test",
-        # iterations=None,
-        iterations=1,
+        iterations=None,
+        # iterations=1,
         save_response=output_dir,
     )
 
     config = config.to_dict()
 
-    results = {"model": checkpoint, "accuracy": acc, "config": config, "prompt_avg": 32}
+    results = {
+        "model": checkpoint,
+        "accuracy": accuracy,
+        "num_responses": readable_responses,
+        "config": config,
+        "prompt_avg": 32,
+    }
 
     with open(output_dir / "results.json", "w") as f:
         json.dump(results, f)
@@ -326,8 +323,13 @@ def evaluation_init(checkpoint):
 
 if __name__ == "__main__":
 
+    config = init()
+    print(config.device)
     logging.basicConfig(
-        level=logging.ERROR, format="%(asctime)s %(levelname)s %(message)s"
+        filename="./logs/running.log",
+        filemode="a",
+        level=logging.ERROR,
+        format="%(asctime)s %(levelname)s %(message)s",
     )
 
     checkpoints = [
@@ -340,7 +342,8 @@ if __name__ == "__main__":
 
     for checkpoint in checkpoints:
         try:
-            evaluate_model(checkpoint)
+            print(f"Running {checkpoint} \n")
+            evaluate_init(checkpoint)
         except Exception as e:
             logging.error(f"Error: in {checkpoint} \n {e}")
         finally:
