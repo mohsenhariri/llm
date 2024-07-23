@@ -12,6 +12,7 @@ class Config:
     device: torch.device
     seed: int
     cache_dir: Path
+    base_dir: Path
 
 
 def init(seed: int = None) -> Config:
@@ -55,7 +56,7 @@ def init(seed: int = None) -> Config:
     else:
         raise FileNotFoundError(f"Environment file not found: {env_path}")
 
-    cache_dir = Path(cs_home) / "cache/misc"
+    cache_dir = Path(cs_home) / ".cache/misc"
 
     # Set random seed for reproducibility if provided
     if seed is not None:
@@ -67,4 +68,4 @@ def init(seed: int = None) -> Config:
             torch.backends.cudnn.deterministic = True
             torch.backends.cudnn.benchmark = False
 
-    return Config(device=device, seed=seed, cache_dir=cache_dir)
+    return Config(device=device, seed=seed, cache_dir=cache_dir, base_dir=cs_home)
