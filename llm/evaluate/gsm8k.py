@@ -161,6 +161,14 @@ def load_model(checkpoint):
     else:
         tokenizer.pad_token_id = 0
 
+    # gen_conf = model.generation_config
+    # gen_conf = gen_conf.to_dict()
+    # for key in gen_conf:
+    #     print(f"{key}: {gen_conf[key]}")
+
+    if model.generation_config.pad_token_id is None:
+        model.generation_config.pad_token_id = tokenizer.pad_token_id
+
     model.eval()
 
     return model, tokenizer
@@ -215,6 +223,7 @@ def evaluate(
     subset="test",
     iterations=None,
     save_response=False,
+    debug=False,
 ):
 
     readable_responses, corrects, input_length_total, input_length_avg = 0, 0, 0, 0
@@ -240,17 +249,11 @@ def evaluate(
 
         print(f"Iteration, {i} \n")
 
-        # print(f"Inference prompt: {prompt} \n")
-
         response, input_prompt_len = generate_response(
             prompt, model, tokenizer, generate_kwargs
         )
 
-        # print(f"Response: {response} \n")
-
         final_answer_prediction = clean_response(response)
-
-        # print(isinstance(final_answer_prediction, str))
 
         if isinstance(final_answer_prediction, str) == False:
 
@@ -258,9 +261,6 @@ def evaluate(
                 final_answer_truth = (
                     float(answer_truth) if "." in answer_truth else int(answer_truth)
                 )
-
-                # print(f"Predicted answer: {final_answer_prediction} \n")
-                # print(f"True answer: {final_answer_truth} \n")
 
                 if final_answer_prediction == final_answer_truth:
                     corrects += 1
@@ -272,7 +272,7 @@ def evaluate(
                     output_dict["prediction"].append(final_answer_prediction)
 
                 readable_responses += 1
-                input_length += input_prompt_len
+                input_length_total += input_prompt_len
 
             except ValueError as e:
                 print(f"Error: Value Error in iteration {i} \n")
@@ -290,13 +290,19 @@ def evaluate(
             unsuccessful_responses_dict["response"].append(response)
             unsuccessful_responses_dict["error"].append(final_answer_prediction)
 
+            if debug:
+                print(f"Inference prompt: {prompt} \n")
+                print(f"Response: {response} \n")
+                print(f"Predicted answer: {final_answer_prediction} \n")
+                print(f"True answer: {final_answer_truth} \n")
+
     if readable_responses == 0:
         accuracy = 0
         input_length_avg = 0
 
     else:
         accuracy = corrects / readable_responses
-        input_length_avg = input_length / readable_responses
+        input_length_avg = input_length_total / readable_responses
 
     print(f"Accuracy: {accuracy}")
 
