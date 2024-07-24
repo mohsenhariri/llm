@@ -373,12 +373,14 @@ if __name__ == "__main__":
 
     checkpoints = [
         "allenai/OLMo-1.7-7B-hf",
-        "mistralai/Mistral-7B-v0.1",
-        "mistralai/Mistral-7B-Instruct-v0.2",
         "meta-llama/Llama-2-7b-hf",
         "meta-llama/Llama-2-7b-chat-hf",
         "meta-llama/Meta-Llama-3-8B",
         "meta-llama/Meta-Llama-3-8B-Instruct",
+        "mistralai/Mistral-7B-v0.1",
+        "mistralai/Mistral-7B-Instruct-v0.1",
+        "mistralai/Mistral-7B-Instruct-v0.2",
+        "mistralai/Mistral-7B-Instruct-v0.3",
     ]
 
     for checkpoint in checkpoints:

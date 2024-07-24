@@ -7,5 +7,5 @@ unittest:
 run:
 		$(PY) llm/evaluate/gsm8k.py
 
-run-kivi:
+run-kivi: #k2, conda_env: kivi2
 		$(PY) llm/evaluate/gsm8k_kivi.py
