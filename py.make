@@ -4,8 +4,11 @@ export QT_QPA_PLATFORM := wayland
 unittest:
 		$(PY) -m unittest $(SRC)/test_*.py
 
-run:
+gsm:
 		$(PY) llm/evaluate/gsm8k.py
 
-run-kivi: #k2, conda_env: kivi2
+gsm-kivi: #k2, conda_env: kivi2
 		$(PY) llm/evaluate/gsm8k_kivi.py
+
+mmlu:
+		$(PY) llm/evaluate/mmlu.py
