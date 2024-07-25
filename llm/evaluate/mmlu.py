@@ -289,8 +289,8 @@ def evaluate_init(checkpoint):
         generate_kwargs,
         n_shots=8,
         # subset="test",
-        # iterations=None,
-        iterations=1,
+        iterations=None,
+        # iterations=1,
         save_response=output_dir,
     )
 
@@ -333,10 +333,10 @@ if __name__ == "__main__":
 
     for checkpoint in checkpoints:
         try:
-        print(f"Running {checkpoint} \n")
-        evaluate_init(checkpoint)
-    except Exception as e:
-        logging.error(f"Error: in {checkpoint} \n {e}")
-        print(f"Error: in {checkpoint} \n {e}")
-    finally:
-        torch.cuda.empty_cache()
+            print(f"Running {checkpoint} \n")
+            evaluate_init(checkpoint)
+        except Exception as e:
+            logging.error(f"Error: in {checkpoint} \n {e}")
+            print(f"Error: in {checkpoint} \n {e}")
+        finally:
+            torch.cuda.empty_cache()
