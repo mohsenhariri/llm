@@ -138,3 +138,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+
+
+# Result of experimets
+
+output/mmlu/**/*.csv
