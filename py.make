@@ -12,3 +12,9 @@ gsm-kivi: #k2, conda_env: kivi2
 
 mmlu:
 		$(PY) llm/evaluate/mmlu.py
+
+gpt2-infer:
+		$(PY) llm/models/gpt/inference.py
+
+
+

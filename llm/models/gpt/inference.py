@@ -1,6 +1,7 @@
 import tiktoken
 import torch
 from GPT2 import GPT2
+from GPT2Config import GPT2Config
 from init import init
 
 conf = init(seed=42)
@@ -17,14 +18,14 @@ tokens = tokens.unsqueeze(0).repeat(batch_size, 1)  # (batch_size, sequence_leng
 
 input_ids = tokens.to(conf.device)
 
-model = GPT2.from_pretrained_direct("gpt2")
+config = GPT2Config()
+model = GPT2(config)
 
 output_ids = model.generate(
     input_ids=input_ids,
     max_length=30,
     num_return_sequences=1,
     do_sample=True,
-    # do_sample=False,
     top_k=50,
 )
 
