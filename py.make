@@ -13,8 +13,21 @@ gsm-kivi: #k2, conda_env: kivi2
 mmlu:
 		$(PY) llm/evaluate/mmlu.py
 
+# GPT2
 gpt2-infer:
 		$(PY) llm/models/gpt/inference.py
 
+gpt2-exp-place:
+		$(PY) llm/models/gpt/exp1_place.py
 
+gpt2-exp-contiguity:
+		$(PY) llm/models/gpt/exp2_contiguity.py
+
+
+llama2-token:
+		$(PY) llm/models/llama/tokenizer.py
+		
+
+llama2-infer:
+		$(PY) llm/models/llama/moinfer.py
 

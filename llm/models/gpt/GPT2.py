@@ -65,18 +65,37 @@ class CausalSelfAttention(nn.Module):
         )  # Normalization by square root of key dimension
 
         T = seq_len
+
+        # Exp1: Placement
+
+        ## out-of-place
         masked_attention_scores_normalized = attention_scores_normalized.masked_fill(
             self.bias[:, :, :T, :T] == 0, float("-inf")
         )
+        attention_weights = F.softmax(
+            masked_attention_scores_normalized, dim=-1
+        )  # it calculates the softmax for each row in the last dimension
 
-        attention_weights = F.softmax(masked_attention_scores_normalized, dim=-1)
-        # it calculates the softmax for each row in the last dimension
+        ## in-place
+        # attention_scores_normalized.masked_fill_(
+        #     self.bias[:, :, :T, :T] == 0, float("-inf")
+        # )
+        # attention_weights = F.softmax(
+        #     attention_scores_normalized, dim=-1
+        # )  # it calculates the softmax for each row in the last dimension
 
         attention = attention_weights @ V  # (batch_size, n_head, seq_len, head_size)
 
+        # Exp2: Contiguity
+        # transpose returns a non-contiguous tensor. To make it better for memory access, we use contiguous()
+
+        # Contiguous tensor
         attention_output = (
             attention.transpose(1, 2).contiguous().view(batch_size, seq_len, n_embd)
         )
+
+        ## Non-contiguous tensor
+        # attention_output = attention.transpose(1, 2).reshape(batch_size, seq_len, n_embd)
 
         return attention_output
 

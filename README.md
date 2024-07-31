@@ -6,6 +6,12 @@ script:`llm/evaluate/gsm8k.py`
 
 
 
+## PyTroch
+
+- using **in-place** methods performs better than using **out-of-place** methods. `output/experiments/{inplace, outplace}`.
+
+- **Contiguous** tensors performs better than non-contiguous. `output/experiments/{contiguity}`. (using `torch.contiguous()` and `torch.view()`)
+
 
 ## KV cache
 

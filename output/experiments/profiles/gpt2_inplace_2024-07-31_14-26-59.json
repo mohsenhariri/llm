@@ -1,0 +1,150 @@
+{
+    "experiment_time": 27.464,
+    "num_experiments": 10,
+    "first_experiment": {
+        "running_time": "4.222 seconds",
+        "GPU_end_memory_allocated": "0.01 GB",
+        "GPU_end_memory_reserved": "0.99 GB",
+        "GPU_max_memory_allocated": "0.72 GB",
+        "GPU_max_memory_reserved": "0.99 GB",
+        "GPU_memory_usage_allocated": "0.01 GB",
+        "GPU_memory_usage_reserved": "0.99 GB",
+        "RAM_peak_usage": "0.01 GB",
+        "RAM_peak_count": "104710"
+    },
+    "average_profile": {
+        "running_time": 2.7199,
+        "GPU_end_memory_allocated": 0.01,
+        "GPU_end_memory_reserved": 0.99,
+        "GPU_max_memory_allocated": 0.72,
+        "GPU_max_memory_reserved": 0.99,
+        "GPU_memory_usage_allocated": 0.001,
+        "GPU_memory_usage_reserved": 0.099,
+        "RAM_peak_usage": 0.001,
+        "RAM_peak_count": 11095.1
+    },
+    "profiles": [
+        {
+            "running_time": "4.222 seconds",
+            "GPU_end_memory_allocated": "0.01 GB",
+            "GPU_end_memory_reserved": "0.99 GB",
+            "GPU_max_memory_allocated": "0.72 GB",
+            "GPU_max_memory_reserved": "0.99 GB",
+            "GPU_memory_usage_allocated": "0.01 GB",
+            "GPU_memory_usage_reserved": "0.99 GB",
+            "RAM_peak_usage": "0.01 GB",
+            "RAM_peak_count": "104710"
+        },
+        {
+            "running_time": "2.773 seconds",
+            "GPU_end_memory_allocated": "0.01 GB",
+            "GPU_end_memory_reserved": "0.99 GB",
+            "GPU_max_memory_allocated": "0.72 GB",
+            "GPU_max_memory_reserved": "0.99 GB",
+            "GPU_memory_usage_allocated": "0.00 GB",
+            "GPU_memory_usage_reserved": "0.00 GB",
+            "RAM_peak_usage": "0.00 GB",
+            "RAM_peak_count": "637"
+        },
+        {
+            "running_time": "2.703 seconds",
+            "GPU_end_memory_allocated": "0.01 GB",
+            "GPU_end_memory_reserved": "0.99 GB",
+            "GPU_max_memory_allocated": "0.72 GB",
+            "GPU_max_memory_reserved": "0.99 GB",
+            "GPU_memory_usage_allocated": "0.00 GB",
+            "GPU_memory_usage_reserved": "0.00 GB",
+            "RAM_peak_usage": "0.00 GB",
+            "RAM_peak_count": "644"
+        },
+        {
+            "running_time": "2.526 seconds",
+            "GPU_end_memory_allocated": "0.01 GB",
+            "GPU_end_memory_reserved": "0.99 GB",
+            "GPU_max_memory_allocated": "0.72 GB",
+            "GPU_max_memory_reserved": "0.99 GB",
+            "GPU_memory_usage_allocated": "0.00 GB",
+            "GPU_memory_usage_reserved": "0.00 GB",
+            "RAM_peak_usage": "0.00 GB",
+            "RAM_peak_count": "718"
+        },
+        {
+            "running_time": "2.484 seconds",
+            "GPU_end_memory_allocated": "0.01 GB",
+            "GPU_end_memory_reserved": "0.99 GB",
+            "GPU_max_memory_allocated": "0.72 GB",
+            "GPU_max_memory_reserved": "0.99 GB",
+            "GPU_memory_usage_allocated": "0.00 GB",
+            "GPU_memory_usage_reserved": "0.00 GB",
+            "RAM_peak_usage": "0.00 GB",
+            "RAM_peak_count": "704"
+        },
+        {
+            "running_time": "2.533 seconds",
+            "GPU_end_memory_allocated": "0.01 GB",
+            "GPU_end_memory_reserved": "0.99 GB",
+            "GPU_max_memory_allocated": "0.72 GB",
+            "GPU_max_memory_reserved": "0.99 GB",
+            "GPU_memory_usage_allocated": "0.00 GB",
+            "GPU_memory_usage_reserved": "0.00 GB",
+            "RAM_peak_usage": "0.00 GB",
+            "RAM_peak_count": "706"
+        },
+        {
+            "running_time": "2.574 seconds",
+            "GPU_end_memory_allocated": "0.01 GB",
+            "GPU_end_memory_reserved": "0.99 GB",
+            "GPU_max_memory_allocated": "0.72 GB",
+            "GPU_max_memory_reserved": "0.99 GB",
+            "GPU_memory_usage_allocated": "0.00 GB",
+            "GPU_memory_usage_reserved": "0.00 GB",
+            "RAM_peak_usage": "0.00 GB",
+            "RAM_peak_count": "973"
+        },
+        {
+            "running_time": "2.432 seconds",
+            "GPU_end_memory_allocated": "0.01 GB",
+            "GPU_end_memory_reserved": "0.99 GB",
+            "GPU_max_memory_allocated": "0.72 GB",
+            "GPU_max_memory_reserved": "0.99 GB",
+            "GPU_memory_usage_allocated": "0.00 GB",
+            "GPU_memory_usage_reserved": "0.00 GB",
+            "RAM_peak_usage": "0.00 GB",
+            "RAM_peak_count": "629"
+        },
+        {
+            "running_time": "2.477 seconds",
+            "GPU_end_memory_allocated": "0.01 GB",
+            "GPU_end_memory_reserved": "0.99 GB",
+            "GPU_max_memory_allocated": "0.72 GB",
+            "GPU_max_memory_reserved": "0.99 GB",
+            "GPU_memory_usage_allocated": "0.00 GB",
+            "GPU_memory_usage_reserved": "0.00 GB",
+            "RAM_peak_usage": "0.00 GB",
+            "RAM_peak_count": "625"
+        },
+        {
+            "running_time": "2.475 seconds",
+            "GPU_end_memory_allocated": "0.01 GB",
+            "GPU_end_memory_reserved": "0.99 GB",
+            "GPU_max_memory_allocated": "0.72 GB",
+            "GPU_max_memory_reserved": "0.99 GB",
+            "GPU_memory_usage_allocated": "0.00 GB",
+            "GPU_memory_usage_reserved": "0.00 GB",
+            "RAM_peak_usage": "0.00 GB",
+            "RAM_peak_count": "605"
+        }
+    ],
+    "return_values": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+    ]
+}
