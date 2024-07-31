@@ -7,10 +7,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from GPT2Config import GPT2Config
-from init import init
 from transformers import GPT2LMHeadModel
-
-conf = init()
 
 
 class CausalSelfAttention(nn.Module):
