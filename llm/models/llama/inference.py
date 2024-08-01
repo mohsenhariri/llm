@@ -14,14 +14,14 @@ tokenizer, vocab_size = load_tokenizer()
 
 def load_model(llama_path=Path(f"{config.base_dir}/.cache/meta_llama2/llama-2-7b/")):
 
-    max_seq_len = 20 # To be fixed
-    max_batch_size = 5 # To be fixed
+    max_seq_len = 20  # To be fixed
+    max_batch_size = 5  # To be fixed
 
-    (
-        torch.set_default_tensor_type(torch.cuda.HalfTensor)
+    ( 
+        torch.set_default_dtype(torch.float16)
         if config.device.type == "cuda"
-        else torch.set_default_tensor_type(torch.BFloat16Tensor)
-    )
+        else torch.set_default_dtype(torch.bfloat16)
+    ) # https://pytorch.org/docs/stable/generated/torch.set_default_dtype.html#torch.set_default_dtype
 
     checkpoints_path = sorted(
         (llama_path).glob("*.pth")
@@ -52,9 +52,8 @@ def load_model(llama_path=Path(f"{config.base_dir}/.cache/meta_llama2/llama-2-7b
 
     print("Checkpoint loaded successfully")
 
-    return model
+    return model, model_args
 
 
-if __name__ == "__main__":
-    model = load_model()
-    print(model)
+
+model, model_args = load_model()
