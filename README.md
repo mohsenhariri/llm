@@ -30,6 +30,12 @@ script:`llm/evaluate/gsm8k.py`
 
 
 
+## Llama models
+
+- Original implementation: `llm/models/llama/meta/model.py`
+- Single node implementation: `llm/models/llama/meta/model_single_node.py`
+
+
 
 
 
